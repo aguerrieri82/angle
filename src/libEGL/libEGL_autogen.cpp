@@ -19,6 +19,12 @@
 #    include "libGLESv2/entry_points_egl_ext_autogen.h"
 #endif  // defined(ANGLE_USE_EGL_LOADER)
 
+
+#if defined(ANGLE_PLATFORM_WINDOWS)
+    #include <stdlib.h>
+    #include <crtdbg.h>
+#endif
+
 namespace
 {
 #if defined(ANGLE_USE_EGL_LOADER)
@@ -36,6 +42,14 @@ void EnsureEGLLoaded()
     {
         return;
     }
+
+    #if defined(ANGLE_PLATFORM_WINDOWS)
+        _set_error_mode(_OUT_TO_STDERR);
+
+        _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_DEBUG);
+        _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
+    #endif
+
 
     std::string errorOut;
     gEntryPointsLib = OpenSystemLibraryAndGetError(ANGLE_DISPATCH_LIBRARY,

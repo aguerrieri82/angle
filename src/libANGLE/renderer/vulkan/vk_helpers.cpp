@@ -6921,7 +6921,8 @@ void ImageHelper::init2DWeakReference(ErrorContext *context,
                                       VkImageUsageFlags usage,
                                       GLint samples,
                                       bool isRobustResourceInitEnabled,
-                                      const ImageFormats &imageFormats)
+                                      const ImageFormats &imageFormats,
+                                      const uint32_t layerCount)
 {
     ASSERT(!valid());
     ASSERT(!IsAnySubresourceContentDefined(mVkImageContentDefined));
@@ -6940,7 +6941,7 @@ void ImageHelper::init2DWeakReference(ErrorContext *context,
     mIsReleasedToExternal    = false;
     mIsForeignImage          = false;
     mCurrentAccess           = ImageAccess::Undefined;
-    mLayerCount              = 1;
+    mLayerCount              = layerCount;
     mLevelCount              = 1;
 
     // The view formats and usage flags are used for imageless framebuffers.
