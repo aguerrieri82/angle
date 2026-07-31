@@ -153,3 +153,6 @@ TestResults.qpa
 
 # Any temporary files will confuse code generation.
 !scripts/code_generation_hashes/*
+DEPS
+DEPS.bak
+DEPS

@@ -72,7 +72,7 @@ angle::Result VkImageImageSiblingVk::initImpl(DisplayVk *displayVk)
     mImage                              = new vk::ImageHelper();
     mImage->init2DWeakReference(displayVk, mVkImage.release(), getSize(), false, intendedFormatID,
                                 formatID, mVkImageInfo.flags, mVkImageInfo.usage, 1,
-                                kIsRobustInitEnabled, imageFormats);
+                                kIsRobustInitEnabled, imageFormats, mVkImageInfo.arrayLayers);
 
     return angle::Result::Continue;
 }
@@ -110,7 +110,8 @@ bool VkImageImageSiblingVk::hasProtectedContent() const
 gl::Extents VkImageImageSiblingVk::getSize() const
 {
     return gl::Extents(mVkImageInfo.extent.width, mVkImageInfo.extent.height,
-                       mVkImageInfo.extent.depth);
+                       mVkImageInfo.imageType == VK_IMAGE_TYPE_3D ? mVkImageInfo.extent.depth
+                                                                  : mVkImageInfo.arrayLayers);
 }
 
 size_t VkImageImageSiblingVk::getSamples() const

@@ -2447,6 +2447,19 @@ angle::Result Renderer::enableInstanceExtensions(vk::ErrorContext *context,
         mEnabledInstanceExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
     }
 
+
+    mEnabledInstanceExtensions.push_back(
+    VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
+
+    mEnabledInstanceExtensions.push_back(
+        VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME);
+
+    mEnabledInstanceExtensions.push_back(
+        VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME);
+
+    mEnabledInstanceExtensions.push_back(
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+        
     // Verify the required extensions are in the extension names set. Fail if not.
     std::sort(mEnabledInstanceExtensions.begin(), mEnabledInstanceExtensions.end(), StrLess);
     ANGLE_VK_TRY(context,
@@ -3252,6 +3265,8 @@ void Renderer::appendDeviceExtensionFeaturesNotPromoted(
     {
         vk::AddToPNextChain(deviceProperties, &mShaderCorePropertiesAMD);
     }
+
+
 }
 
 // The following features and properties used by ANGLE have been promoted to Vulkan 1.1:
@@ -4223,6 +4238,26 @@ void Renderer::enableDeviceExtensionsNotPromoted(const vk::ExtensionNameList &de
     {
         mEnabledDeviceExtensions.push_back(VK_AMD_SHADER_CORE_PROPERTIES_EXTENSION_NAME);
     }
+
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
+
+    #if defined(ANGLE_PLATFORM_WINDOWS)
+
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_FENCE_WIN32_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
+
+    #elif defined(ANGLE_PLATFORM_ANDROID)
+
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME);
+    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
+
+    #endif
 }
 
 // See comment above appendDeviceExtensionFeaturesPromotedTo11.

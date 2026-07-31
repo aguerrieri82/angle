@@ -2498,7 +2498,8 @@ class ImageHelper final : public Resource, public angle::Subject
                              VkImageUsageFlags usage,
                              GLint samples,
                              bool isRobustResourceInitEnabled,
-                             const ImageFormats &imageFormats);
+                             const ImageFormats &imageFormats,
+                             const uint32_t layerCount = 1);
     void resetImageWeakReference();
 
     const Image &getImage() const { return mImage; }
