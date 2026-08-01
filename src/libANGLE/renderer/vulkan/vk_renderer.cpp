@@ -4253,10 +4253,8 @@ void Renderer::enableDeviceExtensionsNotPromoted(const vk::ExtensionNameList &de
 
     #elif defined(ANGLE_PLATFORM_ANDROID)
 
-    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
-    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME);
-    mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
-
+        mEnabledDeviceExtensions.push_back(VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME);
+    
     #endif
 }
 
@@ -4751,8 +4749,7 @@ angle::Result Renderer::createDeviceAndQueue(vk::ErrorContext *context,
     // We enable protected context only if both supportsProtectedMemory and device also supports
     // protected. There are cases we have to disable supportsProtectedMemory feature due to driver
     // bugs.
-    bool enableProtectedContent =
-        queueFamily.supportsProtected() && mFeatures.supportsProtectedMemory.enabled;
+    bool enableProtectedContent = false;
 
     uint32_t queueCount = std::min(queueFamily.getDeviceQueueCount(),
                                    static_cast<uint32_t>(egl::ContextPriority::EnumCount));
@@ -7691,7 +7688,7 @@ void Renderer::reloadVolkIfNeeded() const
 
     if ((mDevice != VK_NULL_HANDLE) && (volkGetLoadedDevice() != mDevice))
     {
-        volkLoadDevice(mDevice);
+       volkLoadDevice(mDevice);
     }
 
     initializeInstanceExtensionEntryPointsFromCore();
