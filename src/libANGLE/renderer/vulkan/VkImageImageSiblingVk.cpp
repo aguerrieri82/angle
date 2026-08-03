@@ -89,7 +89,11 @@ gl::Format VkImageImageSiblingVk::getFormat() const
 
 bool VkImageImageSiblingVk::isRenderable(const gl::Context *context) const
 {
-    return mVkImageInfo.usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    const VkImageUsageFlags attachmentUsage =
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+
+    return (mVkImageInfo.usage & attachmentUsage) != 0;
 }
 
 bool VkImageImageSiblingVk::isTexturable(const gl::Context *context) const
