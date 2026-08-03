@@ -1534,6 +1534,7 @@ bool ContextVk::hasSomethingToFlush() const
 
 angle::Result ContextVk::flushImpl(const gl::Context *context)
 {
+    /*
     // Skip if there's nothing to flush.
     if (!hasSomethingToFlush())
     {
@@ -1581,6 +1582,14 @@ angle::Result ContextVk::flushImpl(const gl::Context *context)
         mRenderer->getFeatures().swapbuffersOnFlushOrFinishWithSingleBuffer.enabled)
     {
         return mCurrentWindowSurface->onSharedPresentContextFlush(this);
+    }
+
+    return flushAndSubmitCommands(nullptr, nullptr, QueueSubmitReason::GLFlush);
+    */
+
+    if (!hasSomethingToFlush())
+    {
+        return angle::Result::Continue;
     }
 
     return flushAndSubmitCommands(nullptr, nullptr, QueueSubmitReason::GLFlush);
