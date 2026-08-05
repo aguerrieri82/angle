@@ -43,6 +43,8 @@
 // Generate mipmap or draw on mismatched stale levels fails on some OpenGL/GLES drivers when robust init is enabled
 532617619 OPENGL : Texture2DTestES3RobustInit.MismatchedStaleLevel*/* = SKIP
 532617619 GLES : Texture2DTestES3RobustInit.MismatchedStaleLevel*/* = SKIP
+532617619 OPENGL : MipmapRobustInitTestES3.GenerateMipmapRobustInitOptimization*/* = SKIP
+532617619 GLES : MipmapRobustInitTestES3.GenerateMipmapRobustInitOptimization*/* = SKIP
 
 381742474 : ShaderStorageBufferTest31.ExceedMaxShaderStorageBlockSize/* = SKIP
 
@@ -2860,8 +2862,10 @@
 529867799 VULKAN : ReadPixelsPBOTest.PackLargeRowLength/* = SKIP
 529867799 INTEL OPENGL : ReadPixelsPBOTest.PackLargeRowLength/* = SKIP
 
-// Using many queries will fail on Pixel 4 GLES
+// Using many queries will fail on Pixel 4 GLES and Win Intel UHD 770 Vulkan
 537692502 PIXEL4ORXL GLES : OcclusionQueriesTest.ExcessiveNumberOfQueries/* = SKIP
+537692502 WIN INTEL VULKAN : OcclusionQueriesTest.ExcessiveNumberOfQueries/* = SKIP
+537692502 WIN INTEL VULKAN : OcclusionQueriesTest.ManyScissoredClearsInsideQuery/* = SKIP
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Slow tests, should appear last in this file

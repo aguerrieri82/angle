@@ -206,6 +206,14 @@ bool operator==(const RectangleImpl<T> &a, const RectangleImpl<T> &b);
 template <typename T>
 bool operator!=(const RectangleImpl<T> &a, const RectangleImpl<T> &b);
 
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const RectangleImpl<T> &rect)
+{
+    os << "x = " << rect.x << ", y = " << rect.y << ", width = " << rect.width
+       << ", height = " << rect.height;
+    return os;
+}
+
 using Rectangle = RectangleImpl<int>;
 
 // Calculate the intersection of two rectangles.  Returns false if the intersection is empty.
@@ -534,15 +542,26 @@ struct PixelStoreStateBase
     GLint skipPixels  = 0;
     GLint imageHeight = 0;
     GLint skipImages  = 0;
+
+    bool operator==(const PixelStoreStateBase &other) const = default;
+    bool operator!=(const PixelStoreStateBase &other) const = default;
 };
 
 struct PixelUnpackState : PixelStoreStateBase
-{};
+{
+    bool operator==(const PixelUnpackState &other) const = default;
+    bool operator!=(const PixelUnpackState &other) const = default;
+};
+std::ostream &operator<<(std::ostream &os, const PixelUnpackState &unpackState);
 
 struct PixelPackState : PixelStoreStateBase
 {
     bool reverseRowOrder = false;
+
+    bool operator==(const PixelPackState &other) const = default;
+    bool operator!=(const PixelPackState &other) const = default;
 };
+std::ostream &operator<<(std::ostream &os, const PixelPackState &packState);
 
 struct SupportedSampleSet
 {
@@ -1284,6 +1303,8 @@ class LevelIndexWrapper
 
 // A GL texture level index.
 using LevelIndex = LevelIndexWrapper<GLint>;
+// A GL texture layer index.
+using LayerIndex = LevelIndexWrapper<uint32_t>;
 
 enum class MultisamplingMode
 {

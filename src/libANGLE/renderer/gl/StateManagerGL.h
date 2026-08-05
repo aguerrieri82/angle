@@ -146,16 +146,22 @@ struct VertexAttributeGL
     GLuint relativeOffset = 0;
 
     GLuint bindingIndex = 0;
+
+    bool operator==(const VertexAttributeGL &other) const = default;
 };
+std::ostream &operator<<(std::ostream &os, const VertexAttributeGL &attribute);
 
 struct VertexBindingGL
 {
     GLuint stride   = 16;
     GLuint divisor  = 0;
-    uintptr_t offset = 0;
+    GLintptr offset = 0;
 
     GLuint buffer = 0;
+
+    bool operator==(const VertexBindingGL &other) const = default;
 };
+std::ostream &operator<<(std::ostream &os, const VertexBindingGL &binding);
 
 struct VertexArrayStateGL
 {
@@ -165,7 +171,12 @@ struct VertexArrayStateGL
 
     angle::FixedVector<VertexAttributeGL, gl::MAX_VERTEX_ATTRIBS> attributes;
     angle::FixedVector<VertexBindingGL, gl::MAX_VERTEX_ATTRIBS> bindings;
+
+    bool operator==(const VertexArrayStateGL &other) const = default;
 };
+std::ostream &operator<<(std::ostream &os, const VertexArrayStateGL &state);
+
+void QueryVertexArrayStateGL(const FunctionsGL *functions, VertexArrayStateGL *state);
 
 struct IndexedBufferBindingGL
 {
@@ -174,6 +185,7 @@ struct IndexedBufferBindingGL
     GLuint buffer   = 0;
 };
 bool operator==(const IndexedBufferBindingGL &a, const IndexedBufferBindingGL &b);
+std::ostream &operator<<(std::ostream &os, const IndexedBufferBindingGL &binding);
 
 struct ImageUnitBindingGL
 {
@@ -187,6 +199,7 @@ struct ImageUnitBindingGL
     GLenum format     = GL_R32UI;
 };
 bool operator==(const ImageUnitBindingGL &a, const ImageUnitBindingGL &b);
+std::ostream &operator<<(std::ostream &os, const ImageUnitBindingGL &binding);
 
 // Caps needed to initialize a new ContextStateGL
 struct ContextStateGLCaps
@@ -196,6 +209,8 @@ struct ContextStateGLCaps
     bool defaultFramebufferSrgbState = false;
     GLenum defaultImageBindingFormat = GL_R32UI;
 
+    GLint maxVertexAttributes            = 0;
+    GLint maxVertexAttribBindings        = 0;
     GLint maxImageUnits                  = 0;
     GLint maxDrawBuffers                 = 0;
     GLint maxUniformBufferBindings       = 0;
@@ -210,6 +225,7 @@ struct ContextStateGL
     GLuint program = 0;
 
     GLuint vao = 0;
+    VertexArrayStateGL defaultVAOState;
     gl::AttribArray<gl::VertexAttribCurrentValueData> vertexAttribCurrentValues;
 
     angle::PackedEnumMap<gl::BufferBinding, GLuint> buffers = {};
@@ -223,17 +239,8 @@ struct ContextStateGL
 
     GLuint transformFeedback = 0;
 
-    GLint unpackAlignment   = 4;
-    GLint unpackRowLength   = 0;
-    GLint unpackSkipRows    = 0;
-    GLint unpackSkipPixels  = 0;
-    GLint unpackImageHeight = 0;
-    GLint unpackSkipImages  = 0;
-
-    GLint packAlignment  = 4;
-    GLint packRowLength  = 0;
-    GLint packSkipRows   = 0;
-    GLint packSkipPixels = 0;
+    gl::PixelUnpackState unpackState;
+    gl::PixelPackState packState;
 
     std::array<GLuint, angle::FramebufferBinding::FramebufferBindingSingletonMax> framebuffers = {
         0};
@@ -317,6 +324,7 @@ struct ContextStateGL
 };
 bool operator==(const ContextStateGL &a, const ContextStateGL &b);
 bool operator!=(const ContextStateGL &a, const ContextStateGL &b);
+std::ostream &operator<<(std::ostream &os, const ContextStateGL &state);
 
 class StateManagerGL final : angle::NonCopyable
 {
@@ -340,7 +348,7 @@ class StateManagerGL final : angle::NonCopyable
 
     void useProgram(GLuint program);
     void forceUseProgram(GLuint program);
-    void bindVertexArray(GLuint vao, VertexArrayStateGL *vaoState);
+    void bindVertexArray(GLuint vao);
     void bindBuffer(gl::BufferBinding target, GLuint buffer);
     void bindBufferBase(gl::BufferBinding target, size_t index, GLuint buffer);
     void bindBufferRange(gl::BufferBinding target,
@@ -350,6 +358,7 @@ class StateManagerGL final : angle::NonCopyable
                          GLsizeiptr size);
     void activeTexture(size_t unit);
     void bindTexture(gl::TextureType type, GLuint texture);
+    void bindTexture(gl::TextureType type, size_t unit, GLuint texture);
     void bindSampler(size_t unit, GLuint sampler);
     void bindImageTexture(size_t unit,
                           GLuint texture,
@@ -387,6 +396,7 @@ class StateManagerGL final : angle::NonCopyable
     void setSampleCoverage(float value, bool invert);
     void forceSetSampleCoverage(float value, bool invert);
     void setSampleMaskEnabled(bool enabled);
+    void setSampleMask(const gl::SampleMaskArray<GLbitfield> &maskValues);
     void setSampleMaski(GLuint maskNumber, GLbitfield mask);
 
     void setDepthTestEnabled(bool enabled);
@@ -486,8 +496,11 @@ class StateManagerGL final : angle::NonCopyable
     bool getHasSeparateFramebufferBindings() const { return mHasSeparateFramebufferBindings; }
 
     GLuint getDefaultVAO() const;
-    VertexArrayStateGL *getDefaultVAOState();
     void setDefaultVAOStateDirty();
+
+    VertexArrayStateGL *getVAOState(GLuint vao);
+    VertexArrayStateGL *getOrCreateVAOState(GLuint vao);
+    VertexArrayStateGL *getCurrentVAOState();
 
     void validateState();
 
@@ -495,7 +508,7 @@ class StateManagerGL final : angle::NonCopyable
     void restoreNativeContext(const gl::Extensions &extensions, const ExternalContextState *state);
 
   private:
-    void forceBindVertexArray(GLuint vao, VertexArrayStateGL *vaoState);
+    void forceBindVertexArray(GLuint vao);
 
     void setTextureCubemapSeamlessEnabled(bool enabled);
 
@@ -535,6 +548,9 @@ class StateManagerGL final : angle::NonCopyable
     void updateMultiviewBaseViewLayerIndexUniformImpl(
         const gl::ProgramExecutable *executable,
         const gl::FramebufferState &drawFramebufferState) const;
+
+    void setDefaultVAOState(const VertexArrayStateGL &state);
+    angle::Result setState(const gl::Context *context, const ContextStateGL &state);
 
     void syncBlendFromNativeContext(const gl::Extensions &extensions, ExternalContextState *state);
     void restoreBlendNativeContext(const gl::Extensions &extensions,
@@ -581,15 +597,15 @@ class StateManagerGL final : angle::NonCopyable
     const bool mSupportsVertexArrayObjects;
 
     GLuint mDefaultVAO = 0;
-    // The current state of the default VAO is owned by StateManagerGL. It may be shared between
-    // multiple VertexArrayGL objects if the native driver does not support vertex array objects.
-    // When this object is shared, StateManagerGL forces VertexArrayGL to resynchronize itself every
-    // time a new vertex array is bound.
-    VertexArrayStateGL mDefaultVAOState;
 
-    // The state of the currently bound vertex array object so StateManagerGL can know about the
-    // current element array buffer.
-    VertexArrayStateGL *mVAOState = nullptr;
+    // The state of all tracked VAOs. It is owned by StateManagerGL because it affects the global
+    // element array buffer binding when a new VAO is bound.
+    //
+    // The current state of the default VAO is in mState. It may be shared
+    // between multiple VertexArrayGL objects if the native driver does not support vertex array
+    // objects. When this object is shared, StateManagerGL forces VertexArrayGL to resynchronize
+    // itself every time a new vertex array is bound.
+    std::map<GLuint, VertexArrayStateGL> mVAOStates;
 
     TransformFeedbackGL *mCurrentTransformFeedback;
 
