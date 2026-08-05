@@ -66,11 +66,16 @@ angle::Result VkImageImageSiblingVk::initImpl(DisplayVk *displayVk)
         mFormat          = gl::Format(format.glInternalFormat);
     }
 
+    const gl::Extents vkExtents(
+            mVkImageInfo.extent.width,
+            mVkImageInfo.extent.height,
+            mVkImageInfo.extent.depth); 
+
     // Create the image
     constexpr bool kIsRobustInitEnabled = false;
     vk::ImageHelper::ImageFormats imageFormats = {vk::GetVkFormatFromFormatID(renderer, formatID)};
     mImage                              = new vk::ImageHelper();
-    mImage->init2DWeakReference(displayVk, mVkImage.release(), getSize(), false, intendedFormatID,
+    mImage->init2DWeakReference(displayVk, mVkImage.release(), vkExtents, false, intendedFormatID,
                                 formatID, mVkImageInfo.flags, mVkImageInfo.usage, 1,
                                 kIsRobustInitEnabled, imageFormats, mVkImageInfo.arrayLayers);
 

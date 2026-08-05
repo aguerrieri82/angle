@@ -3719,9 +3719,18 @@ angle::Result TextureVk::respecifyImageStorageIfNecessary(ContextVk *contextVk, 
     // Create a new image if the storage state is enabled for the first time.
     if (mState.hasBeenBoundAsImage())
     {
-        mImageUsageFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
-        mImageCreateFlags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
-        mFormatReinterpretability = vk::ImageFormatReinterpretability::Full;
+        if (!mOwnsImage)
+        {
+            // External EGL/Vulkan image: its VkImage creation contract cannot
+            // be changed or respecified. It must already support storage usage.
+            ASSERT((mImage->getUsage() & VK_IMAGE_USAGE_STORAGE_BIT) != 0);
+        }
+        else
+        {
+            mImageUsageFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
+            mImageCreateFlags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+            mFormatReinterpretability = vk::ImageFormatReinterpretability::Full;
+        }
     }
 
     // If we're handling dirty srgb decode/override state, we may have to reallocate the image with
