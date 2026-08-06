@@ -1024,6 +1024,9 @@ DebugUtilsMessenger(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     }
 
     std::ostringstream log;
+    
+    log << "ANGLE ";
+
     if (callbackData->pMessageIdName != nullptr)
     {
         log << "[ " << callbackData->pMessageIdName << " ] ";
@@ -1081,6 +1084,10 @@ DebugUtilsMessenger(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 
     bool isError    = (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0;
     std::string msg = log.str();
+
+    #if defined(ANGLE_PLATFORM_WINDOWS)
+        OutputDebugStringA(msg.c_str());
+    #endif
 
     if (isError)
     {
@@ -4245,8 +4252,6 @@ void Renderer::enableDeviceExtensionsNotPromoted(const vk::ExtensionNameList &de
     mEnabledDeviceExtensions.push_back(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
     mEnabledDeviceExtensions.push_back(VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME);
 
-    mEnabledDeviceExtensions.push_back(VK_EXT_FRAGMENT_DENSITY_MAP_EXTENSION_NAME);
-
     #if defined(ANGLE_PLATFORM_WINDOWS)
 
     mEnabledDeviceExtensions.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
@@ -4256,6 +4261,7 @@ void Renderer::enableDeviceExtensionsNotPromoted(const vk::ExtensionNameList &de
     #elif defined(ANGLE_PLATFORM_ANDROID)
 
         mEnabledDeviceExtensions.push_back(VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME);
+        mEnabledDeviceExtensions.push_back(VK_EXT_FRAGMENT_DENSITY_MAP_EXTENSION_NAME);
     
     #endif
 }
